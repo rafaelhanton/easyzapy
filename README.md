@@ -1,51 +1,80 @@
-# Whaticket OPEN AI - Pro Version
-Esse repositório é onde será armazenado a versão da APIBRASIL do Whaticket
+# easyzapy - Whaticket OPEN AI - Pro Version
 
-# Dependencia
-```bash
-apt install git -y && apt update -y && apt upgrade -y
-```
-# Download
-```bash
-cd /opt && git clone https://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@github.com/jhowbhz/apibrasil-whaticket-openai.git chatbot && cd /opt/chatbot
-```
-# Adicionando usuário deploy
-```bash
-adduser deploy
-```
+Este repositório contém a versão da APIBRASIL do Whaticket, uma aplicação full-stack com backend Node.js/TypeScript e frontend React.
+
+## Pré-requisitos
+
+Certifique-se de ter os seguintes softwares instalados em sua máquina:
+
+- **Docker** e **Docker Compose**: Para gerenciar os serviços de banco de dados (PostgreSQL) e cache (Redis).
+- **Node.js** (versão 18 ou superior recomendada) e **npm** (ou Yarn): Para executar as aplicações backend e frontend.
+
+## 2. Iniciar os Serviços de Banco de Dados e Cache (Docker Compose)
+
+Navegue até o diretório raiz do projeto e inicie os contêineres do Redis e PostgreSQL usando Docker Compose.
 
 ```bash
-sudo usermod -aG sudo deploy
-``` 
-
-# URL repo
-```bash
-https://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@github.com/APIBrasil/apibrasil-whaticket-openai.git
+docker compose up -d
 ```
 
-# Comandos adicionais
+## 3. Configuração e Execução do Backend
+
+### Instalar Dependências
+
+Navegue até o diretório `backend/` e instale as dependências do Node.js:
+
 ```bash
-ERR_OSSL_EVP_UNSUPPORTED
-export NODE_OPTIONS=--openssl-legacy-provider
-
------------------------
-install node 18
-curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash  && source ~/.profile  && nvm install 18 && nvm use 18
-
-install yarn
-curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - && echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list && sudo apt update -y && sudo apt install yarn -y
-
-npm install pm2 -g
-
-------------------------
-npx sequelize db:migrate
-npx sequelize db:seed:all
-
-------------------------
-
-Up backend
-pm2 start dist/server.js --name apibrasil01-backend --node-args="--max-old-space-size=8096"
-
-Up frontend
-pm2 start server.js --name apibrasil01-frontend
+cd backend
+npm install # ou yarn install
+npm build # ou yarn install
 ```
+
+### Executar Migrações e Seeds do Banco de Dados
+
+Após a instalação das dependências, execute as migrações e os seeds para configurar o banco de dados. Certifique-se de que os serviços Docker (PostgreSQL) estejam rodando.
+
+```bash
+npm run db:migrate # ou yarn db:migrate
+npm run db:seed # ou yarn db:seed
+```
+
+### Iniciar o Servidor Backend
+
+Você pode iniciar o backend em modo de desenvolvimento (com recarregamento automático) ou em modo de produção (após a compilação).
+
+- **Modo de Desenvolvimento (recomendado para trabalhar no código):**
+  ```bash
+  npm run dev:server # ou yarn dev:server
+  ```
+- **Modo de Produção (requer compilação prévia):**
+  ```bash
+  npm start # ou yarn start
+  ```
+
+O backend estará acessível em `http://localhost:8080` (ou a porta configurada no seu `backend/.env`).
+
+## 4. Configuração e Execução do Frontend
+
+### Instalar Dependências
+
+Navegue até o diretório `frontend/` e instale as dependências do Node.js:
+
+```bash
+cd frontend/
+npm install # ou yarn install
+npm build # ou yarn install
+```
+
+### Iniciar o Servidor Frontend
+
+Inicie o servidor de desenvolvimento do React:
+
+```bash
+npm start # ou yarn start
+```
+
+O frontend estará acessível em `http://localhost:3000` (ou a porta configurada no seu `frontend/.env`).
+
+---
+
+Após seguir todos esses passos, sua aplicação easyzapy deverá estar rodando completamente.
