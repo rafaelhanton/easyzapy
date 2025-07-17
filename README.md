@@ -78,3 +78,66 @@ O frontend estará acessível em `http://localhost:3000` (ou a porta configurada
 ---
 
 Após seguir todos esses passos, sua aplicação easyzapy deverá estar rodando completamente.
+
+## 5. Executando Aplicações com PM2 (Para Persistência)
+
+Se você deseja que suas aplicações backend e frontend continuem rodando em segundo plano, mesmo após fechar o terminal da VPS, você pode usar o PM2 (Process Manager 2).
+
+### Instalar PM2 Globalmente
+
+Primeiro, instale o PM2 globalmente na sua VPS:
+
+```bash
+npm install -g pm2
+```
+
+### Iniciar o Backend com PM2
+
+Navegue até o diretório `backend/` e inicie o backend com PM2:
+
+```bash
+cd backend
+pm2 start npm --name "easyzapy-backend" -- start
+```
+
+### Iniciar o Frontend com PM2
+
+Navegue até o diretório `frontend/` e inicie o frontend com PM2:
+
+```bash
+cd frontend
+pm2 start npm --name "easyzapy-frontend" -- start
+```
+
+### Comandos Úteis do PM2
+
+- **Listar todos os processos PM2:**
+  ```bash
+pm2 list
+  ```
+- **Ver logs de um processo:**
+  ```bash
+pm2 logs <nome_do_processo>
+  ```
+  (Ex: `pm2 logs easyzapy-backend`)
+- **Parar um processo:**
+  ```bash
+pm2 stop <nome_do_processo>
+  ```
+- **Reiniciar um processo:**
+  ```bash
+pm2 restart <nome_do_processo>
+  ```
+- **Remover um processo:**
+  ```bash
+pm2 delete <nome_do_processo>
+  ```
+- **Salvar a lista de processos para reiniciar automaticamente após o reboot da VPS:**
+  ```bash
+pm2 save
+  ```
+- **Configurar PM2 para iniciar no boot do sistema:**
+  ```bash
+pm2 startup
+  ```
+  (Siga as instruções que aparecerão no terminal após este comando)
