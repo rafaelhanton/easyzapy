@@ -68,6 +68,7 @@ type Session = WASocket & {
 
 interface SessionOpenAi extends OpenAIApi {
   id?: number;
+  history?: ChatCompletionRequestMessage[];
 }
 const sessionsOpenAi: SessionOpenAi[] = [];
 
@@ -648,6 +649,7 @@ const handleOpenAi = async (
     });
     openai = new OpenAIApi(configuration);
     openai.id = wbot.id;
+    openai.history = [];
     sessionsOpenAi.push(openai);
   } else {
     openai = sessionsOpenAi[openAiIndex];
@@ -665,37 +667,25 @@ const handleOpenAi = async (
     } tokens e cuide para não truncar o final.\nSempre que possível, mencione o nome dele para ser mais personalizado o atendimento e mais educado. Quando a resposta requer uma transferência para o setor de atendimento, comece sua resposta com 'Ação: Transferir para o setor de atendimento'.\n
   ${prompt.prompt}\n`;
 
-  let messagesOpenAi: ChatCompletionRequestMessage[] = [];
+  let messagesOpenAi: ChatCompletionRequestMessage[] = openai.history || [];
 
   if (msg.message?.conversation || msg.message?.extendedTextMessage?.text) {
-    messagesOpenAi = [];
-    messagesOpenAi.push({ role: "system", content: promptSystem });
-    for (
-      let i = 0;
-      i < Math.min(prompt.maxMessages, messages.length);
-      i++
-    ) {
-      const message = messages[i];
-      if (message.mediaType === "chat") {
-        if (message.fromMe) {
-          messagesOpenAi.push({ role: "assistant", content: message.body });
-        } else {
-          messagesOpenAi.push({ role: "user", content: message.body });
-        }
-      }
+    if (messagesOpenAi.length === 0) {
+      messagesOpenAi.push({ role: "system", content: promptSystem });
     }
+
     messagesOpenAi.push({ role: "user", content: bodyMessage! });
 
     const chat = await openai.createChatCompletion({
-      // model: "gpt-3.5-turbo-1106",
-      // model: 'chatgpt-4o-latest',
-      model: process.env.OPENAI_MODEL ? process.env.OPENAI_MODEL : 'chatgpt-4o-latest', // 'gpt-3.5-turbo-1106', // 'chatgpt-4o-latest',
+      model: process.env.OPENAI_MODEL ? process.env.OPENAI_MODEL : 'chatgpt-4o-latest',
       messages: messagesOpenAi,
       max_tokens: prompt.maxTokens,
       temperature: prompt.temperature,
     });
 
     let response = chat.data.choices[0].message?.content;
+    messagesOpenAi.push({ role: "assistant", content: response! });
+    openai.history = messagesOpenAi;
 
     if (response?.includes("Ação: Transferir para o setor de atendimento")) {
       await transferQueue(prompt.queueId, ticket, contact);
@@ -738,22 +728,10 @@ const handleOpenAi = async (
     const file = fs.createReadStream(`${publicFolder}/${mediaUrl}`) as any;
     const transcription = await openai.createTranscription(file, "whisper-1");
 
-    messagesOpenAi = [];
-    messagesOpenAi.push({ role: "system", content: promptSystem });
-    for (
-      let i = 0;
-      i < Math.min(prompt.maxMessages, messages.length);
-      i++
-    ) {
-      const message = messages[i];
-      if (message.mediaType === "chat") {
-        if (message.fromMe) {
-          messagesOpenAi.push({ role: "assistant", content: message.body });
-        } else {
-          messagesOpenAi.push({ role: "user", content: message.body });
-        }
-      }
+    if (messagesOpenAi.length === 0) {
+      messagesOpenAi.push({ role: "system", content: promptSystem });
     }
+
     messagesOpenAi.push({ role: "user", content: transcription.data.text });
     const chat = await openai.createChatCompletion({
       model: "gpt-3.5-turbo-1106",
@@ -762,6 +740,8 @@ const handleOpenAi = async (
       temperature: prompt.temperature
     });
     let response = chat.data.choices[0].message?.content;
+    messagesOpenAi.push({ role: "assistant", content: response! });
+    openai.history = messagesOpenAi;
 
     if (response?.includes("Ação: Transferir para o setor de atendimento")) {
       await transferQueue(prompt.queueId, ticket, contact);
@@ -799,7 +779,7 @@ const handleOpenAi = async (
       });
     }
   }
-  messagesOpenAi = [];
+  
 };
 
 const transferQueue = async (
