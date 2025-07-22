@@ -39,12 +39,12 @@ export const createSubscription = async (
   try {
     const response = await client.payments.create({
       idempotencyKey: uuidv4(),
-      sourceId: sourceId,
+      sourceId: String(sourceId),
       amountMoney: {
         amount: BigInt(Math.trunc(price * 100)),
         currency: "BRL",
       },
-      orderId: invoiceId,
+      orderId: String(invoiceId),
     });
 
     return res.json(response.payment);
