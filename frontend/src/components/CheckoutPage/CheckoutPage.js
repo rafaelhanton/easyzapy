@@ -10,6 +10,7 @@ import {
 import { Formik, Form } from "formik";
 
 import AddressForm from "./Forms/AddressForm";
+import Pricing from "./Forms/Pricing";
 import PaymentForm from "./Forms/PaymentForm";
 import ReviewOrder from "./ReviewOrder";
 import CheckoutSuccess from "./CheckoutSuccess";
@@ -29,13 +30,13 @@ import Invoices from "../../pages/Financeiro";
 
 
 export default function CheckoutPage(props) {
-  const steps = ["Dados", "Personalizar", "Revisar"];
+  const steps = ["Plano", "Pagamento", "Revisar"];
   const { formId, formField } = checkoutFormModel;
   
   
   
   const classes = useStyles();
-  const [activeStep, setActiveStep] = useState(1);
+  const [activeStep, setActiveStep] = useState(0);
   const [datePayment, setDatePayment] = useState(null);
   const [invoiceId, setinvoiceId] = useState(props.Invoice.id);
   const currentValidationSchema = validationSchema[activeStep];
@@ -46,15 +47,17 @@ function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
 
   switch (step) {
     case 0:
-      return <AddressForm formField={formField} values={values} setFieldValue={setFieldValue}  />;
+      return <Pricing 
+        formField={formField} 
+        setFieldValue={setFieldValue} 
+        setActiveStep={setActiveStep} 
+        activeStep={step} 
+        values={values}
+      />;
     case 1:
       return <PaymentForm 
-      formField={formField} 
-      setFieldValue={setFieldValue} 
-      setActiveStep={setActiveStep} 
-      activeStep={step} 
-      invoiceId={invoiceId}
-      values={values}
+        formField={formField} 
+        setFieldValue={setFieldValue} 
       />;
     case 2:
       return <ReviewOrder />;
@@ -68,17 +71,7 @@ function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
     try {
       const plan = JSON.parse(values.plan);
       const newValues = {
-        firstName: values.firstName,
-        lastName: values.lastName,
-        address2: values.address2,
-        city: values.city,
-        state: values.state,
-        zipcode: values.zipcode,
-        country: values.country,
-        useAddressForPaymentDetails: values.useAddressForPaymentDetails,
-        nameOnCard: values.nameOnCard,
-        cardNumber: values.cardNumber,
-        cvv: values.cvv,
+        ...values,
         plan: values.plan,
         price: plan.price,
         users: plan.users,
@@ -139,23 +132,21 @@ function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
                 {_renderStepContent(activeStep, setFieldValue, setActiveStep, values)}
 
                 <div className={classes.buttons}>
-                  {activeStep !== 1 && (
+                  {activeStep !== 0 && (
                     <Button onClick={_handleBack} className={classes.button}>
                       VOLTAR
                     </Button>
                   )}
                   <div className={classes.wrapper}>
-                    {activeStep !== 1 && (
-                      <Button
-                        disabled={isSubmitting}
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        className={classes.button}
-                      >
-                        {isLastStep ? "PAGAR" : "PRÓXIMO"}
-                      </Button>
-                    )}
+                    <Button
+                      disabled={isSubmitting}
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      className={classes.button}
+                    >
+                      {isLastStep ? "PAGAR" : "PRÓXIMO"}
+                    </Button>
                     {isSubmitting && (
                       <CircularProgress
                         size={24}
