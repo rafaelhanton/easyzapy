@@ -9,6 +9,8 @@ import StarIcon from '@material-ui/icons/StarBorder';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 
+import { useContext } from "react";
+import { AuthContext } from "../../../context/Auth/AuthContext";
 import usePlans from "../../../hooks/usePlans";
 import useCompanies from "../../../hooks/useCompanies";
 
@@ -71,27 +73,34 @@ export default function Pricing(props) {
   const { find } = useCompanies();
 
   const classes = useStyles();
+  const { user } = useContext(AuthContext);
   const [usersPlans, setUsersPlans] = React.useState(3);
   const [companiesPlans, setCompaniesPlans] = useState(0);
   const [connectionsPlans, setConnectionsPlans] = React.useState(3);
   const [storagePlans, setStoragePlans] = React.useState([]);
   const [customValuePlans, setCustomValuePlans] = React.useState(49.00);
   const [loading, setLoading] = React.useState(false);
-  const companyId = localStorage.getItem("companyId");
+  const companyId = user.companyId;
 
   useEffect(() => {
     async function fetchData() {
-      await loadCompanies();
+      if (user && user.companyId) {
+        await loadCompanies();
+      }
     }
     fetchData();
-  }, [])
+  }, [user, user.companyId])
 
   const loadCompanies = async () => {
     setLoading(true);
     try {
       const companiesList = await find(companyId);
-      setCompaniesPlans(companiesList.planId);
-      await loadPlans(companiesList.planId);
+      if (companiesList && companiesList.planId) {
+        setCompaniesPlans(companiesList.planId);
+        await loadPlans(companiesList.planId);
+      } else {
+        console.warn("Company or planId not found for the given companyId.", companyId);
+      }
     } catch (e) {
       console.log(e);
       // toast.error("Não foi possível carregar a lista de registros");

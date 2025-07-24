@@ -38,7 +38,7 @@ export default function CheckoutPage(props) {
   const classes = useStyles();
   const [activeStep, setActiveStep] = useState(0);
   const [datePayment, setDatePayment] = useState(null);
-  const [invoiceId, setinvoiceId] = useState(props.Invoice.id);
+  const [invoiceId, setinvoiceId] = useState(props.Invoice?.id ?? null);
   const currentValidationSchema = validationSchema[activeStep];
   const isLastStep = activeStep === steps.length - 1;
   const { user } = useContext(AuthContext);
@@ -76,13 +76,14 @@ function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
         price: plan.price,
         users: plan.users,
         connections: plan.connections,
-        invoiceId: invoiceId
+        invoiceId: invoiceId,
+        sourceId: values.sourceId,
       }
 
       const { data } = await api.post("/subscription", newValues);
       setDatePayment(data)
-      actions.setSubmitting(false);
       setActiveStep(activeStep + 1);
+      actions.setSubmitting(false);
       toast.success("Assinatura realizada com sucesso!, aguardando a realização do pagamento");
     } catch (err) {
       toastError(err);
@@ -91,6 +92,11 @@ function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
 
   function _handleSubmit(values, actions) {
     if (isLastStep) {
+      if (!values.sourceId) {
+        toastError({ message: "Por favor, preencha os dados do cartão e aguarde a verificação." });
+        actions.setSubmitting(false);
+        return;
+      }
       _submitForm(values, actions);
     } else {
       setActiveStep(activeStep + 1);
@@ -105,9 +111,7 @@ function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
 
   return (
     <React.Fragment>
-      <Typography component="h1" variant="h4" align="center">
-        Falta pouco!
-      </Typography>
+      
       <Stepper activeStep={activeStep} className={classes.stepper}>
         {steps.map((label) => (
           <Step key={label}>
@@ -117,7 +121,7 @@ function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
       </Stepper>
       <React.Fragment>
         {activeStep === steps.length ? (
-          <CheckoutSuccess pix={datePayment} />
+          <CheckoutSuccess payment={datePayment} />
         ) : (
           <Formik
             initialValues={{

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import express from "express";
 import * as Yup from "yup";
-import { SquareClient } from "square";
+import { SquareClient, SquareEnvironment } from "square";
 import { v4 as uuidv4 } from "uuid";
 // import Gerencianet from "gn-api-sdk-typescript";
 import AppError from "../errors/AppError";
@@ -18,9 +18,12 @@ const app = express();
 
 import squareConfig from "../config/square";
 
+console.log("Square Access Token:", squareConfig.accessToken);
+console.log("Square Environment:", squareConfig.environment);
+console.log("Type of Square Environment:", typeof squareConfig.environment);
 const client = new SquareClient({
   token: squareConfig.accessToken,
-  environment: squareConfig.environment as 'sandbox' | 'production',
+  environment: squareConfig.environment === 'production' ? SquareEnvironment.Production : SquareEnvironment.Sandbox,
 });
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -28,6 +31,31 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   // return res.json(gerencianet.getSubscriptions());
   return res.json({ message: "Not implemented" });
 };
+
+function convertBigIntsToNumbers(obj: any): any {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => convertBigIntsToNumbers(item));
+  }
+
+  const newObj: { [key: string]: any } = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const value = obj[key];
+      if (typeof value === 'bigint') {
+        newObj[key] = Number(value);
+      } else if (typeof value === 'object') {
+        newObj[key] = convertBigIntsToNumbers(value);
+      } else {
+        newObj[key] = value;
+      }
+    }
+  }
+  return newObj;
+}
 
 export const createSubscription = async (
   req: Request,
@@ -42,12 +70,13 @@ export const createSubscription = async (
       sourceId: String(sourceId),
       amountMoney: {
         amount: BigInt(Math.trunc(price * 100)),
-        currency: "BRL",
+        currency: "USD",
       },
-      orderId: String(invoiceId),
+      
     });
 
-    return res.json(response.payment);
+    const paymentResponse = convertBigIntsToNumbers(response.payment);
+    return res.json(paymentResponse);
   } catch (error) {
     console.log(error);
     throw new AppError("Payment fails", 400);
