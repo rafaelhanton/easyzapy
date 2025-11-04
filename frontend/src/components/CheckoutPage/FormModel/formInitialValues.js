@@ -28,6 +28,5 @@ export default {
   [nameOnCard.name]: '',
   [cardNumber.name]: '',
   [invoiceId.name]: '',
-  [cvv.name]: '',
-  sourceId: ''
+  [cvv.name]: ''
 };

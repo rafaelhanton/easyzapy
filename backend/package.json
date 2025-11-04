@@ -18,11 +18,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.13",
     "@adiwajshing/keyed-db": "^0.2.4",
-    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+	  "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@hapi/boom": "^9.1.4",
     "@sentry/node": "^6.18.1",
-    "@whiskeysockets/baileys": "6.7.13",
     "bcryptjs": "^2.4.3",
     "bull": "^4.8.2",
     "cookie-parser": "^1.4.6",
@@ -54,7 +54,6 @@
     "sequelize-cli": "^5.5.1",
     "sequelize-typescript": "^1.1.0",
     "socket.io": "^4.8.1",
-    "square": "^43.0.1",
     "uuid": "^8.3.2",
     "xlsx": "^0.18.3",
     "yup": "^0.32.11"

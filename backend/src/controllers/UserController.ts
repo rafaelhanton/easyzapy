@@ -60,24 +60,15 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
-  let user;
-  try {
-    user = await CreateUserService({
-      email,
-      password,
-      name,
-      profile,
-      companyId: bodyCompanyId || userCompanyId,
-      queueIds,
-      whatsappId
-    });
-    return res.status(200).json(user);
-  } catch (err) {
-    if (err.name === "SequelizeUniqueConstraintError") {
-      throw new AppError("Este e-mail já está em uso.", 400);
-    }
-    throw err;
-  }
+  const user = await CreateUserService({
+    email,
+    password,
+    name,
+    profile,
+    companyId: bodyCompanyId || userCompanyId,
+    queueIds,
+    whatsappId
+  });
 
   const io = getIO();
   io.emit(`company-${userCompanyId}-user`, {

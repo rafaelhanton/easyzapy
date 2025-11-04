@@ -145,24 +145,20 @@ const MainListItems = (props) => {
 
   useEffect(() => {
     async function fetchData() {
-      if (user && user.companyId) {
-        const companyId = user.companyId;
-        const planConfigs = await getPlanCompany(undefined, companyId);
+      const companyId = user.companyId;
+      const planConfigs = await getPlanCompany(undefined, companyId);
 
-        if (planConfigs && planConfigs.plan) {
-          setShowCampaigns(planConfigs.plan.useCampaigns);
-          setShowKanban(planConfigs.plan.useKanban);
-          setShowOpenAi(planConfigs.plan.useOpenAi);
-          setShowIntegrations(planConfigs.plan.useIntegrations);
-          setShowSchedules(planConfigs.plan.useSchedules);
-          setShowInternalChat(planConfigs.plan.useInternalChat);
-          setShowExternalApi(planConfigs.plan.useExternalApi);
-        }
-      }
+      setShowCampaigns(planConfigs.plan.useCampaigns);
+      setShowKanban(planConfigs.plan.useKanban);
+      setShowOpenAi(planConfigs.plan.useOpenAi);
+      setShowIntegrations(planConfigs.plan.useIntegrations);
+      setShowSchedules(planConfigs.plan.useSchedules);
+      setShowInternalChat(planConfigs.plan.useInternalChat);
+      setShowExternalApi(planConfigs.plan.useExternalApi);
     }
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, user.companyId]);
+  }, []);
 
 
   useEffect(() => {
